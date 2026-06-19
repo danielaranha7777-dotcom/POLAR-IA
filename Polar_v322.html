@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente Virtual: Polar</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.5s;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            width: 460px;
+            text-align: center;
+        }
+
+        /* ── HEADER COM AVATAR ── */
+        .polar-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .polar-avatar-img {
+            width: 68px;
+            height: 68px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 3px 10px rgba(0,0,0,0.3));
+        }
+        #label_titulo {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .botoes {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover { filter: brightness(90%); }
+        .btn-salvar      { background-color: #28a745; }
+        .btn-limpar      { background-color: #e67e22; }
+        .btn-escutar     { background-color: #9b59b6; }
+        .btn-ler-img     { background-color: #34495e; }
+        .btn-ver-memoria { background-color: #00bcd4; }
+        .btn-baixar-img  { background-color: #17a2b8; font-size: 11px; padding: 6px 10px; margin-top: 5px; }
+        .btn-voz-on      { background-color: #6c757d; }
+        .btn-voz-off     { background-color: #dc3545; }
+        /* botão Visão Web */
+        .btn-visao-web   { background-color: #8e44ad; }
+
+        .caixa-resposta {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+            height: 350px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            scroll-behavior: smooth;
+        }
+        .forma-container {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .status-rede {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 12px;
+            font-style: italic;
+        }
+        .lista-comandos {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .lista-comandos ul { margin: 5px 0 0 20px; padding: 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER COM AVATAR SVG -->
+    <div class="polar-header">
+        <svg class="polar-avatar-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <rect width="100" height="100" fill="#14151f" rx="15"/>
+            <circle cx="50" cy="50" r="40" fill="#1e2235" stroke="#2a314d" stroke-width="1"/>
+            <rect x="35" y="8" width="30" height="22" fill="#2c3e50" rx="2"/>
+            <ellipse cx="50" cy="30" rx="22" ry="4" fill="#2c3e50"/>
+            <rect x="35" y="25" width="30" height="4" fill="#00d2d3"/>
+            <circle cx="28" cy="35" r="8" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1.5"/>
+            <circle cx="28" cy="35" r="4" fill="#2c3e50"/>
+            <circle cx="72" cy="35" r="8" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1.5"/>
+            <circle cx="72" cy="35" r="4" fill="#2c3e50"/>
+            <path d="M22,50 Q50,22 78,50 Z" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1"/>
+            <path d="M22,58 Q50,86 78,58 Z" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1"/>
+            <polygon points="30,49 35,54 40,48 45,54 50,47 55,54 60,48 65,54 70,49" fill="#00d2d3" opacity="0.8"/>
+            <polygon points="30,59 35,54 40,60 45,54 50,61 55,54 60,60 65,54 70,59" fill="#00d2d3" opacity="0.8"/>
+            <circle cx="38" cy="54" r="7" fill="#ffffff" stroke="#00d2d3" stroke-width="1"/>
+            <circle cx="38" cy="54" r="3.5" fill="#0abde3"/>
+            <circle cx="62" cy="54" r="7" fill="#ffffff" stroke="#10ac84" stroke-width="1"/>
+            <circle cx="62" cy="54" r="3.5" fill="#10ac84"/>
+            <polygon points="38,82 50,88 38,94" fill="#ee5253"/>
+            <polygon points="62,82 50,88 62,94" fill="#ee5253"/>
+            <circle cx="50" cy="88" r="3" fill="#ff6b6b"/>
+        </svg>
+        <h1 id="label_titulo"></h1>
+    </div>
+
+    <input type="text" id="entrada_pergunta" placeholder="Pergunte ao Polar ou peça um desenho...">
+
+    <div class="botoes">
+        <button onclick="responder()">Perguntar</button>
+        <button class="btn-escutar" onclick="escutarVoz()">Ouvir</button>
+        <button id="btn_voz" class="btn-voz-on" onclick="alternarVoz()">Voz: LIGADA</button>
+        <button class="btn-ler-img" onclick="document.getElementById('upload_imagem').click()">Ler Imagem</button>
+        <input type="file" id="upload_imagem" accept="image/*" style="display:none;" onchange="recriarImagemComFormas(event)">
+        <button class="btn-visao-web" onclick="ativarVisaoWeb()">🔭 Visão Web</button>
+        <button class="btn-ver-memoria" onclick="verMemoria()">Ver Memória</button>
+        <button class="btn-salvar" onclick="salvarConversa()">Salvar Chat</button>
+        <button class="btn-limpar" onclick="limparTela()">Limpar</button>
+    </div>
+
+    <div id="caixa_resposta" class="caixa-resposta">
+        <i>Aguardando sua interação... Digite <b>"comandos"</b> para ver o que posso fazer.</i><br><br>
+    </div>
+
+    <div id="status_rede" class="status-rede">
+        Rede Neural: 0 sinapses de conhecimento ativas.
+    </div>
+</div>
+
+<script>
+    const meu_nome = "Polar";
+    const seu_nome = "DGRamos";
+    let vozAtivada = true;
+    let aguardandoVisaoWeb = false; // flag para o modo Visão Web
+
+    const dicionarioBase = {
+        "o que e internet": "A internet é uma rede global de computadores interconectados.",
+        "computador": "Uma máquina eletrônica capaz de receber, processar e armazenar dados.",
+        "programacao": "O ato de escrever instruções para que um computador execute tarefas."
+    };
+
+    let memoriaConhecimento = JSON.parse(localStorage.getItem("memoria_polar")) || dicionarioBase;
+    let aprendizadoPendente = { emProgresso: false, chavePergunta: "" };
+
+    // ── MEMÓRIA DE CONTEXTO (para associar perguntas relacionadas) ──
+    let contextoAtual = {
+        ultimoAssunto: null,      // Último tema mencionado
+        tipoUltimaPergunta: null, // 'visao_web', 'pesquisa', etc
+        timestampUltima: 0        // Para expirar contexto após 5 minutos
+    };
+
+    let malhaAtiva = {
+        ativa: false, celulas: 10, tamanho: 30, elementos: []
+    };
+
+    const paletaCores = {
+        "vermelho escuro": "#8B0000", "vermelho": "#FF0000", "carmesim": "#DC143C",
+        "verde claro": "#90EE90", "verde lima": "#32CD32", "verde escuro": "#006400", "verde": "#228B22",
+        "azul claro": "#ADD8E6", "azul escuro": "#00008B", "azul": "#0000FF",
+        "amarelo claro": "#FFFFE0", "amarelo": "#FFFF00", "rosa": "#e84393",
+        "roxo": "#800080", "laranja": "#FFA500", "preto": "#000000", "cinza": "#808080", "branco": "#FFFFFF"
+    };
+
+    const bibliotecaDesenhos = {
+        "pão": (c1,c2) => `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 100 100"><path d="M10,90 L90,90 L90,50 L10,50 Z" fill="${c1}"/><path d="M5,50 L50,10 L95,50 Z" fill="${c2}"/><rect x="40" y="50" width="20" height="40" fill="#2c3e50"/></svg>`,
+        "casa": (c1,c2) => `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 100 100"><rect x="20" y="50" width="60" height="40" fill="${c1}"/><polygon points="10,50 50,15 90,50" fill="${c2}"/><rect x="40" y="60" width="20" height="30" fill="#ecf0f1"/></svg>`,
+        "carro": (c1,c2) => `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 100 100"><rect x="10" y="50" width="80" height="25" rx="5" fill="${c1}"/><rect x="25" y="30" width="50" height="20" rx="5" fill="${c2}"/><circle cx="25" cy="75" r="10" fill="#2c3e50"/><circle cx="75" cy="75" r="10" fill="#2c3e50"/></svg>`
+    };
+
+    // ── HELPERS ──────────────────────────────────────────
+    function normalizarTexto(t) {
+        return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+                .replace(/[?.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim().replace(/\s+/g," ");
+    }
+
+    function atualizarPainelRede() {
+        document.getElementById("status_rede").innerText =
+            `Rede Neural: ${Object.keys(memoriaConhecimento).length} sinapses de conhecimento ativas. | Malha: ${malhaAtiva.elementos.length} figura(s).`;
+    }
+
+    document.getElementById("label_titulo").innerText = `Olá, ${seu_nome}! Eu sou o ${meu_nome}.`;
+    atualizarPainelRede();
+
+    // ── VOZ ──────────────────────────────────────────────
+    function alternarVoz() {
+        vozAtivada = !vozAtivada;
+        const btn = document.getElementById("btn_voz");
+        btn.innerText  = vozAtivada ? "Voz: LIGADA" : "Voz: DESLIGADA";
+        btn.className  = vozAtivada ? "btn-voz-on"  : "btn-voz-off";
+        if (!vozAtivada) window.speechSynthesis.cancel();
+    }
+
+    function falar(texto) {
+        if (vozAtivada && 'speechSynthesis' in window) {
+            const m = new SpeechSynthesisUtterance();
+            m.text = texto.replace(/<[^>]*>/g,' ');
+            m.lang = 'pt-BR'; m.rate = 1.2;
+            window.speechSynthesis.speak(m);
+        }
+    }
+
+    // ── MALHA QUADRICULADA ───────────────────────────────
+    function renderizarMalhaGrafica() {
+        let sz = malhaAtiva.tamanho, w = malhaAtiva.celulas * sz;
+        let id = Date.now();
+        let svg = `<svg id="malha_${id}" xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w}" viewBox="0 0 ${w} ${w}" style="background:#fcfcfc;border:2px solid #333;border-radius:4px;">`;
+        for (let i = 0; i <= malhaAtiva.celulas; i++) {
+            svg += `<line x1="${i*sz}" y1="0" x2="${i*sz}" y2="${w}" stroke="#ddd" stroke-width="1"/>`;
+            svg += `<line x1="0" y1="${i*sz}" x2="${w}" y2="${i*sz}" stroke="#ddd" stroke-width="1"/>`;
+        }
+        malhaAtiva.elementos.forEach(el => {
+            let x=el.col*sz, y=el.row*sz;
+            if (el.tipo==='quadrado')  svg+=`<rect x="${x}" y="${y}" width="${sz}" height="${sz}" fill="${el.cor}" stroke="#000" stroke-width="1"/>`;
+            if (el.tipo==='triangulo') svg+=`<polygon points="${x+(sz/2)},${y} ${x},${y+sz} ${x+sz},${y+sz}" fill="${el.cor}" stroke="#000" stroke-width="1"/>`;
+            if (el.tipo==='circulo')   svg+=`<circle cx="${x+(sz/2)}" cy="${y+(sz/2)}" r="${sz/2.2}" fill="${el.cor}" stroke="#000" stroke-width="1"/>`;
+        });
+        svg += `</svg>`;
+        return { svg, idSvg: id };
+    }
+
+    function limparMalhaLogica() {
+        malhaAtiva.elementos = []; malhaAtiva.ativa = false;
+        atualizarPainelRede();
+        const caixa = document.getElementById("caixa_resposta");
+        caixa.innerHTML += `<b>${meu_nome}:</b> <i>Malha quadriculada limpa.</i><br><br>`;
+        caixa.scrollTop = caixa.scrollHeight;
+    }
+
+    function processarComandosDeMalha(texto) {
+        let t = normalizarTexto(texto);
+        const ativ = ["quadrado","triangulo","circulo","retangulo","malha"];
+        const pos  = ["superior","inferior","direito","esquerdo","centro","lado","encaixado","acima","abaixo"];
+        if (!ativ.some(a=>t.includes(a)) || !pos.some(p=>t.includes(p))) return null;
+        malhaAtiva.ativa = true;
+
+        let instrucoes = t.split(/\s+e\s+|,/);
+        let formasAdicionadas = 0;
+        let uCol=4, uRow=4;
+        if (malhaAtiva.elementos.length > 0) {
+            let ul = malhaAtiva.elementos[malhaAtiva.elementos.length-1];
+            uCol=ul.col; uRow=ul.row;
+        }
+        instrucoes.forEach(inst => {
+            let tipo = null;
+            if      (inst.includes("quadrado"))  tipo="quadrado";
+            else if (inst.includes("triangulo")) tipo="triangulo";
+            else if (inst.includes("circulo"))   tipo="circulo";
+            if (!tipo) return;
+
+            let cor = "#3498db";
+            let chaves = Object.keys(paletaCores).sort((a,b)=>b.length-a.length);
+            for (let c of chaves) { if (inst.includes(normalizarTexto(c))) { cor=paletaCores[c]; break; } }
+
+            let col=4, row=4;
+            if      (inst.includes("superior")&&inst.includes("direito"))  {col=8;row=1;}
+            else if (inst.includes("superior")&&inst.includes("esquerdo")) {col=1;row=1;}
+            else if (inst.includes("inferior")&&inst.includes("direito"))  {col=8;row=8;}
+            else if (inst.includes("inferior")&&inst.includes("esquerdo")) {col=1;row=8;}
+            else if (inst.includes("centro"))                               {col=4;row=4;}
+            else if (inst.includes("lado direito")||inst.includes("a direita"))  {col=uCol+1;row=uRow;}
+            else if (inst.includes("lado esquerdo")||inst.includes("a esquerda")){col=uCol-1;row=uRow;}
+            else if (inst.includes("acima")||inst.includes("em cima"))     {col=uCol;row=uRow-1;}
+            else if (inst.includes("abaixo")||inst.includes("embaixo"))    {col=uCol;row=uRow+1;}
+            else {col=uCol;row=uRow;}
+
+            col=Math.max(0,Math.min(malhaAtiva.celulas-1,col));
+            row=Math.max(0,Math.min(malhaAtiva.celulas-1,row));
+            malhaAtiva.elementos.push({tipo,cor,col,row});
+            uCol=col; uRow=row; formasAdicionadas++;
+        });
+
+        if (formasAdicionadas > 0) {
+            atualizarPainelRede();
+            let r = renderizarMalhaGrafica();
+            let html = `<div class="forma-container">${r.svg}
+                <div style="margin-top:5px;display:flex;gap:6px;">
+                    <button class="btn-baixar-img" onclick="baixarImagemSVG('malha_${r.idSvg}','malha_polar')">Salvar Malha</button>
+                    <button class="btn-limpar" style="font-size:11px;padding:6px 10px;" onclick="limparMalhaLogica()">Limpar Malha</button>
+                </div></div>`;
+            return { texto:`Pronto! Processei ${formasAdicionadas} forma(s) na malha quadriculada.`, html };
+        }
+        return null;
+    }
+
+    // ── MEMÓRIA ──────────────────────────────────────────
+    function verMemoria() {
+        const caixa = document.getElementById("caixa_resposta");
+        const mem = localStorage.getItem("memoria_polar");
+        if (mem) {
+            const obj = JSON.parse(mem);
+            let lista = "<ul>";
+            for (const k in obj) lista += `<li><b>${k}:</b> ${obj[k]}</li>`;
+            lista += "</ul>";
+            caixa.innerHTML += `<b>${meu_nome}:</b> Aqui está o que aprendi:<br><div class="lista-comandos">${lista}</div><br>`;
+            falar("Aqui está o que tenho na memória.");
+        } else {
+            caixa.innerHTML += `<b>${meu_nome}:</b> Minha memória está vazia.<br>`;
+            falar("Minha memória de aprendizado está vazia.");
+        }
+        caixa.scrollTop = caixa.scrollHeight;
+    }
+
+    // ── VOZ INPUT ────────────────────────────────────────
+    function escutarVoz() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const r = new SR();
+            r.lang = 'pt-BR';
+            r.onresult = e => { document.getElementById("entrada_pergunta").value = e.results[0][0].transcript; responder(); };
+            r.start();
+        } else { alert("Seu navegador não suporta reconhecimento de voz."); }
+    }
+
+    // ── LIMPAR ───────────────────────────────────────────
+    function limparTela() {
+        document.getElementById("caixa_resposta").innerHTML = "<i>Histórico limpo. Aguardando sua interação...</i><br><br>";
+    }
+
+    // ── DOWNLOAD SVG ─────────────────────────────────────
+    function baixarImagemSVG(idEl, nome) {
+        const el = document.getElementById(idEl);
+        const blob = new Blob([new XMLSerializer().serializeToString(el)], {type:"image/svg+xml;charset=utf-8"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = nome+"_polar.svg"; a.click();
+    }
+
+    // ── LER IMAGEM (upload) ───────────────────────────────
+    function recriarImagemComFormas(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const img = new Image(), leitor = new FileReader();
+        leitor.onload = e => { img.src = e.target.result; };
+        img.onload = function() {
+            const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+            const resolucao=50, prop=resolucao/img.width;
+            canvas.width=resolucao; canvas.height=Math.floor(img.height*prop);
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+            const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+            const esc=7, id="img_obra_"+Date.now();
+            let svg=`<svg id="${id}" xmlns="http://www.w3.org/2000/svg" width="${canvas.width*esc}" height="${canvas.height*esc}" viewBox="0 0 ${canvas.width*esc} ${canvas.height*esc}">`;
+            for (let y=0;y<canvas.height;y++) for (let x=0;x<canvas.width;x++) {
+                const i=(y*canvas.width+x)*4, r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+                if (a>50) {
+                    const cor=`rgb(${r},${g},${b})`, t=esc+0.5;
+                    svg += Math.random()>0.5
+                        ? `<rect x="${x*esc}" y="${y*esc}" width="${t}" height="${t}" fill="${cor}"/>`
+                        : `<circle cx="${x*esc+t/2}" cy="${y*esc+t/2}" r="${t/2}" fill="${cor}"/>`;
+                }
+            }
+            svg+=`</svg>`;
+            const caixa=document.getElementById("caixa_resposta");
+            const html=`<div class="forma-container">${svg}<button class="btn-baixar-img" onclick="baixarImagemSVG('${id}','polar_art')">Salvar Arte Polar</button></div>`;
+            caixa.innerHTML+=`<b>${seu_nome}:</b> <i>[Upload de arquivo]</i><br><b>${meu_nome}:</b> Analisei os pixels e reconstruí essa imagem!<br>${html}<br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            falar("Imagem processada com formas geométricas.");
+            document.getElementById('upload_imagem').value="";
+        };
+        leitor.readAsDataURL(file);
+    }
+
+    // ── SORTEIO ───────────────────────────────────────────
+    function extrairGerarNumero(texto) {
+        const m = texto.match(/(?:gere|sorteie|diga|escolha).*(\d+).*(?:ate|a|e).*(\d+)/i);
+        if (m) {
+            const min=Math.min(parseInt(m[1]),parseInt(m[2])), max=Math.max(parseInt(m[1]),parseInt(m[2]));
+            return { min, max, resultado: Math.floor(Math.random()*(max-min+1))+min };
+        }
+        return null;
+    }
+
+    // ── DESENHO (biblioteca) ──────────────────────────────
+    function extrairImagemEDesenhar(texto) {
+        const tM = texto.toLowerCase();
+        if (!tM.includes("gere")&&!tM.includes("desenhe")&&!tM.includes("crie")&&!tM.includes("imagem")) return null;
+        let desenho=null;
+        for (const k in bibliotecaDesenhos) if (tM.includes(k)) { desenho=k; break; }
+        if (!desenho) return null;
+        let cores=[];
+        for (const c in paletaCores) if (tM.includes(c)) cores.push(paletaCores[c]);
+        const c1=cores[0]||"#3498db", c2=cores[1]||cores[0]||"#2c3e50";
+        const id="img_"+Date.now();
+        let svg=bibliotecaDesenhos[desenho](c1,c2).replace('<svg ',`<svg id="${id}" `);
+        return {
+            html:`<div class="forma-container">${svg}<button class="btn-baixar-img" onclick="baixarImagemSVG('${id}','${desenho}')">Salvar Imagem</button></div>`,
+            texto:`Pronto! Aqui está a imagem do ${desenho}.`
+        };
+    }
+
+    // ── MATEMÁTICA ───────────────────────────────────────
+    function calcularMatematica(exp) {
+        if (!/[0-9]/.test(exp)||/[a-z]{3,}/i.test(exp)) return null;
+        const ex=exp.replace(/[^-()\d/*+.]/g,'');
+        if (ex==="") return null;
+        try { const r=eval(ex); return (typeof r==='number'&&isFinite(r))?r:null; } catch(e){return null;}
+    }
+
+    // ── PESQUISA TEXTO (Wikipédia + DuckDuckGo) ──────────
+    function detectarPesquisa(pN) {
+        // ── Gatilhos diretos de pesquisa ──
+        const gatilhos = [
+            "pesquise","pesquisar","procure","procurar","busque","buscar","google",
+            "o que e","o que foi","quem e","quem foi","quem era","quando foi",
+            "onde fica","onde e","como foi","como funciona","me fale sobre",
+            "me conta sobre","fale sobre","conte sobre"
+        ];
+
+        const gatilhoEncontrado = gatilhos.find(g => pN.includes(g));
+        if (gatilhoEncontrado) {
+            // Remove o verbo de comando e conectivos (pesquise sobre, busque por...)
+            let termo = pN
+                .replace(/^(pesquise|pesquisar|procure|procurar|busque|buscar|google|me fale|me conta|fale|conte)\s*(sobre|por|de|na internet|na web|a respeito de)?\s*/,'')
+                .trim();
+            if (termo === "") termo = pN;
+            return termo;
+        }
+
+        // ── CONTINUIDADE DE CONTEXTO para pesquisas ──
+        // Detecta frases de ligação: "E o Ronaldo", "E a Madonna", "Que tal Einstein"
+        const agora = Date.now();
+        const contextoVigente = (agora - contextoAtual.timestampUltima) < 5*60*1000; // 5 minutos
+
+        if (contextoVigente && contextoAtual.tipoUltimaPergunta === 'pesquisa') {
+            // Padrões de continuidade explícita (alta confiança)
+            const padroesContinuidade = [
+                /^e o\s+/,   /^e a\s+/,   /^e os\s+/,  /^e as\s+/,
+                /^e sobre\s+/, /^e quanto ao?\s+/, /^e quanto a\s+/,
+                /^que tal\s+/, /^e agora\s+/, /^e tambem\s+/,
+                /^e o que dizer de\s+/, /^e quanto a\s+/,
+                /^agora me fale de\s+/, /^agora\s+/,
+                /^e\s+/       // genérico: "E o Ronaldo" → "ronaldo"
+            ];
+
+            for (let p of padroesContinuidade) {
+                if (p.test(pN)) {
+                    const termo = pN.replace(p,'').trim();
+                    if (termo.length > 1) return termo;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    async function pesquisarNaWikipedia(termo) {
+        const url=`https://pt.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(termo)}&gsrlimit=1&prop=extracts|info&inprop=url&exintro=true&explaintext=true&exsentences=4`;
+        const r=await fetch(url); const d=await r.json();
+        if (!d.query||!d.query.pages) return null;
+        const pages=Object.values(d.query.pages);
+        if (!pages.length) return null;
+        const p=pages[0];
+        if (!p.extract||p.extract.trim()==="") return null;
+        return { texto:p.extract.trim(), titulo:p.title, url:p.fullurl||`https://pt.wikipedia.org/wiki/${encodeURIComponent(p.title.replace(/ /g,'_'))}` };
+    }
+
+    async function pesquisarNaInternet(termo) {
+        const caixa=document.getElementById("caixa_resposta");
+        
+        // Verifica se é continuação de contexto para mostrar mensagem diferente
+        const ehContinuacao = contextoAtual.tipoUltimaPergunta === 'pesquisa' &&
+                              (Date.now() - contextoAtual.timestampUltima) < 5*60*1000;
+        const msgBusca = ehContinuacao && contextoAtual.ultimoAssunto !== termo
+            ? `<i>Continuando... pesquisando sobre "<b>${termo}</b>"...</i>`
+            : `<i>Pesquisando sobre "<b>${termo}</b>"...</i>`;
+
+        caixa.innerHTML+=`<b>${meu_nome}:</b> ${msgBusca}<br><br>`;
+        caixa.scrollTop=caixa.scrollHeight;
+        
+        // ── REGISTRA CONTEXTO ──
+        contextoAtual.ultimoAssunto = termo;
+        contextoAtual.tipoUltimaPergunta = 'pesquisa';
+        contextoAtual.timestampUltima = Date.now();
+        
+        try {
+            let textoResposta="";
+            const wiki=await pesquisarNaWikipedia(termo);
+            if (wiki) {
+                textoResposta=`${wiki.texto}<br><small>📖 Fonte: Wikipédia — <a href="${wiki.url}" target="_blank">${wiki.titulo}</a></small>`;
+            } else {
+                const r=await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(termo)}&format=json&no_html=1&skip_disambig=1&t=polar_assistant`);
+                const d=await r.json();
+                if      (d.AbstractText) textoResposta=d.AbstractText+(d.AbstractURL?`<br><small>🔗 <a href="${d.AbstractURL}" target="_blank">${d.AbstractURL}</a></small>`:"");
+                else if (d.Answer)       textoResposta=d.Answer;
+                else if (d.Definition)   textoResposta=d.Definition+(d.DefinitionURL?`<br><small>🔗 <a href="${d.DefinitionURL}" target="_blank">${d.DefinitionURL}</a></small>`:"");
+                else if (d.RelatedTopics&&d.RelatedTopics[0]&&d.RelatedTopics[0].Text) textoResposta=d.RelatedTopics[0].Text;
+                else textoResposta=`Não encontrei resposta direta. <a href="https://pt.wikipedia.org/w/index.php?search=${encodeURIComponent(termo)}" target="_blank">Pesquisar na Wikipédia →</a>`;
+            }
+            caixa.innerHTML+=`<b>${meu_nome}:</b> ${textoResposta}<br><br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            falar(textoResposta);
+        } catch(e) {
+            caixa.innerHTML+=`<b>${meu_nome}:</b> Erro ao pesquisar. Verifique sua conexão.<br><br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+        }
+    }
+
+    // ── VISÃO WEB (busca + recriação em quadrados) ────────
+
+    // Ativa o modo de espera: próximo texto digitado será o termo de busca de imagem
+    function ativarVisaoWeb() {
+        const caixa=document.getElementById("caixa_resposta");
+        const input=document.getElementById("entrada_pergunta");
+        if (caixa.innerHTML.includes("Aguardando sua interação...")) caixa.innerHTML="";
+        aguardandoVisaoWeb=true;
+        caixa.innerHTML+=`<b>${meu_nome}:</b> <i>Modo Visão Web ativado! O que devo buscar e recriar em quadrados?</i><br><br>`;
+        caixa.scrollTop=caixa.scrollHeight;
+        input.placeholder="Digite o que devo buscar (ex: leão, montanha, gato)...";
+        input.style.borderColor="#8e44ad";
+        input.focus();
+        falar("Modo Visão Web ativado! O que devo buscar e recriar em quadrados?");
+    }
+
+    // Detecta pedidos de imagem pelo texto também (sem precisar do botão)
+    // Agora também verifica contexto: se o último pedido foi Visão Web e agora é só um termo, continua
+    function detectarBuscaImagem(pN) {
+        const padroes=[
+            /^mostre imagem de\s+/,  /^busque imagem de\s+/,
+            /^foto de\s+/,           /^mostrar imagem de\s+/,
+            /^ver imagem de\s+/,     /^pesquise imagem de\s+/,
+            /^visao polar de\s+/,    /^visao web de\s+/,
+            /^me mostre imagem de\s+/
+        ];
+        for (let p of padroes) {
+            if (p.test(pN)) return pN.replace(p,'').trim();
+        }
+        
+        // ── CONTINUIDADE DE CONTEXTO ──
+        // Se o último pedido foi Visão Web e agora é um termo simples (sem verbo de ação)
+        // e não contém outras palavras-chave (como "pesquise", "desenhe"), assume que é Visão Web
+        const agora = Date.now();
+        const contextoVigente = (agora - contextoAtual.timestampUltima) < 5*60*1000; // 5 minutos
+        
+        if (contextoVigente && contextoAtual.tipoUltimaPergunta === 'visao_web') {
+            // Verifica se não é outro comando (pesquisa, sorteio, desenho, etc)
+            const naoEhOutroComando = 
+                !pN.includes("pesquise") && !pN.includes("pesquisar") &&
+                !pN.includes("desenhe") && !pN.includes("gere") &&
+                !pN.includes("sorteie") && !pN.includes("hora") &&
+                !pN.includes("modo") && pN.length > 2;
+            
+            if (naoEhOutroComando) {
+                // Assume que é uma continuidade da busca de imagem anterior
+                return pN;
+            }
+        }
+        
+        return null;
+    }
+
+    // Busca thumbnail na Wikipédia (pt → en como fallback)
+    async function buscarThumbnailWiki(termo, lang='pt') {
+        const url=`https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(termo)}&gsrlimit=5&prop=pageimages&pithumbsize=500&pilimit=5`;
+        const r=await fetch(url); const d=await r.json();
+        if (!d.query||!d.query.pages) return null;
+        const pages=Object.values(d.query.pages);
+        for (let p of pages) if (p.thumbnail&&p.thumbnail.source) return p.thumbnail.source;
+        return null;
+    }
+
+    // Recria imagem de URL usando APENAS quadrados (rectsangles)
+    function recriarImagemDeURL(imgUrl, termo) {
+        const caixa=document.getElementById("caixa_resposta");
+        const img=new Image();
+        img.crossOrigin="anonymous";
+
+        img.onload=function() {
+            const canvas=document.createElement('canvas'), ctx=canvas.getContext('2d');
+            const resolucao=55, prop=resolucao/img.width;
+            canvas.width=resolucao; canvas.height=Math.floor(img.height*prop);
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+            let imageData;
+            try { imageData=ctx.getImageData(0,0,canvas.width,canvas.height).data; }
+            catch(e) {
+                caixa.innerHTML+=`<b>${meu_nome}:</b> Não consegui processar a imagem (bloqueio de segurança do navegador). Tente executar via servidor.<br><br>`;
+                caixa.scrollTop=caixa.scrollHeight;
+                return;
+            }
+
+            const esc=6; // quadrados menores → mais detalhe
+            const id="visao_web_"+Date.now();
+            let svg=`<svg id="${id}" xmlns="http://www.w3.org/2000/svg" width="${canvas.width*esc}" height="${canvas.height*esc}" viewBox="0 0 ${canvas.width*esc} ${canvas.height*esc}">`;
+            for (let y=0;y<canvas.height;y++) for (let x=0;x<canvas.width;x++) {
+                const i=(y*canvas.width+x)*4, r=imageData[i], g=imageData[i+1], b=imageData[i+2], a=imageData[i+3];
+                if (a>50) {
+                    // APENAS QUADRADOS (rect) — distingue da Visão por Upload
+                    svg+=`<rect x="${x*esc}" y="${y*esc}" width="${esc+0.5}" height="${esc+0.5}" fill="rgb(${r},${g},${b})"/>`;
+                }
+            }
+            svg+=`</svg>`;
+
+            const html=`<div class="forma-container">${svg}
+                <button class="btn-baixar-img" onclick="baixarImagemSVG('${id}','visao_web_${termo.replace(/\s+/g,'_')}')">Salvar Visão Web</button>
+            </div>`;
+            caixa.innerHTML+=`<b>${meu_nome}:</b> Aqui está minha visão de "<b>${termo}</b>" recriada em quadrados!<br>${html}<br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            falar(`Aqui está minha visão de ${termo} recriada em quadrados!`);
+        };
+
+        img.onerror=function() {
+            caixa.innerHTML+=`<b>${meu_nome}:</b> Não consegui carregar a imagem encontrada. Tente outro termo.<br><br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            falar("Não consegui carregar a imagem. Tente outro termo.");
+        };
+
+        img.src=imgUrl;
+    }
+
+    // Orquestra busca e recriação
+    // Também registra o contexto para continuidade de perguntas futuras
+    async function buscarERecriarImagem(termo) {
+        const caixa=document.getElementById("caixa_resposta");
+        caixa.innerHTML+=`<b>${meu_nome}:</b> <i>Buscando imagem de "${termo}"... 🔭</i><br><br>`;
+        caixa.scrollTop=caixa.scrollHeight;
+        
+        // ── REGISTRA CONTEXTO ──
+        contextoAtual.ultimoAssunto = termo;
+        contextoAtual.tipoUltimaPergunta = 'visao_web';
+        contextoAtual.timestampUltima = Date.now();
+        
+        try {
+            // Tenta Wikipédia em português, depois inglês
+            let imgUrl = await buscarThumbnailWiki(termo,'pt');
+            if (!imgUrl) imgUrl = await buscarThumbnailWiki(termo,'en');
+
+            if (!imgUrl) {
+                caixa.innerHTML+=`<b>${meu_nome}:</b> Não encontrei imagem para "<b>${termo}</b>" na Wikipédia. Tente outro nome (em inglês pode ajudar).<br><br>`;
+                caixa.scrollTop=caixa.scrollHeight;
+                falar("Não encontrei imagem. Tente outro termo.");
+                return;
+            }
+            recriarImagemDeURL(imgUrl, termo);
+        } catch(e) {
+            caixa.innerHTML+=`<b>${meu_nome}:</b> Erro ao buscar imagem. Verifique sua conexão.<br><br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            console.error("Erro Visão Web:", e);
+        }
+    }
+
+    // ── COMANDOS ─────────────────────────────────────────
+    function obterListaComandos() {
+        return `<div class="lista-comandos"><b>Comandos disponíveis:</b><ul>
+            <li><b>🔭 Visão Web:</b> Clique no botão ou diga "mostre imagem de [algo]", "foto de [algo]".</li>
+            <li><b>🔍 Pesquisa:</b> "Pesquise sobre...", "O que é...", "Quem foi..." (usa Wikipédia).</li>
+            <li><b>🗺️ Malha:</b> "Gere um quadrado vermelho no centro e um triângulo azul à direita".</li>
+            <li><b>🖼 Visão Upload:</b> Clique em "Ler Imagem" para recriar fotos com formas.</li>
+            <li><b>✏️ Desenho:</b> "Desenhe uma casa verde e azul" (casa, carro, pão).</li>
+            <li><b>🔢 Sorteio:</b> "Sorteie um número de 1 a 100".</li>
+            <li><b>🧮 Matemática:</b> qualquer conta, ex: 25 * 4.</li>
+            <li><b>🕐 Hora:</b> "Que horas são?".</li>
+            <li><b>🌙 Tema:</b> "modo escuro" / "modo claro".</li>
+        </ul></div>`;
+    }
+
+    // ── RESPONDER (núcleo) ────────────────────────────────
+    function responder() {
+        const input=document.getElementById("entrada_pergunta");
+        const pergunta=input.value.trim();
+        const caixa=document.getElementById("caixa_resposta");
+        if (pergunta==="") return;
+        if (caixa.innerHTML.includes("Aguardando sua interação...")) caixa.innerHTML="";
+
+        let pM=pergunta.toLowerCase();
+        let pN=normalizarTexto(pergunta);
+
+        input.style.borderColor="#ccc";
+        input.placeholder="Pergunte ao Polar ou peça um desenho...";
+
+        // ── Modo Visão Web aguardando termo ──
+        if (aguardandoVisaoWeb) {
+            aguardandoVisaoWeb=false;
+            input.style.borderColor="#ccc";
+            caixa.innerHTML+=`<b>${seu_nome}:</b> ${pergunta}<br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            input.value="";
+            buscarERecriarImagem(pN);
+            return;
+        }
+
+        let comandoMalha   = processarComandosDeMalha(pergunta);
+        let calculo        = calcularMatematica(pergunta);
+        let criacaoImagem  = extrairImagemEDesenhar(pergunta);
+        let sorteio        = extrairGerarNumero(pergunta);
+        let termoPesquisa  = detectarPesquisa(pN);
+        // Só verifica busca de imagem se não é desenho da biblioteca
+        let termoBuscaImg  = (criacaoImagem===null) ? detectarBuscaImagem(pN) : null;
+
+        let respostaBot="", htmlAdicional="";
+
+        if (aprendizadoPendente.emProgresso) {
+            memoriaConhecimento[aprendizadoPendente.chavePergunta]=pergunta;
+            localStorage.setItem("memoria_polar",JSON.stringify(memoriaConhecimento));
+            respostaBot=`Entendido! Aprendi que "${aprendizadoPendente.chavePergunta}" significa: ${pergunta}.`;
+            aprendizadoPendente.emProgresso=false;
+            atualizarPainelRede();
+        }
+        else if (pM==="comandos"||pM==="ajuda") {
+            respostaBot="Aqui está o que posso fazer:";
+            htmlAdicional=obterListaComandos();
+        }
+        else if (comandoMalha!==null) {
+            respostaBot=comandoMalha.texto; htmlAdicional=comandoMalha.html;
+        }
+        else if (criacaoImagem!==null) {
+            respostaBot=criacaoImagem.texto; htmlAdicional=criacaoImagem.html;
+        }
+        else if (termoBuscaImg!==null) {
+            caixa.innerHTML+=`<b>${seu_nome}:</b> ${pergunta}<br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            input.value=""; buscarERecriarImagem(termoBuscaImg); return;
+        }
+        else if (sorteio!==null) {
+            respostaBot=`Sorteando entre ${sorteio.min} e ${sorteio.max}: o número é <b>${sorteio.resultado}</b>.`;
+        }
+        else if (calculo!==null) {
+            respostaBot=(calculo===67)?"psoora é six seven":`O resultado é <b>${calculo}</b>.`;
+        }
+        else if (pM.includes("hora")) {
+            const agora=new Date();
+            respostaBot=`Agora são <b>${agora.getHours()}h${String(agora.getMinutes()).padStart(2,'0')}</b>.`;
+        }
+        else if (pM.includes("modo escuro")) {
+            document.body.style.backgroundColor="#2c3e50"; respostaBot="Modo escuro ativado.";
+        }
+        else if (pM.includes("modo claro")) {
+            document.body.style.backgroundColor="#f0f2f5"; respostaBot="Modo claro ativado.";
+        }
+        else if (pM.includes("quem criou voce")||pM.includes("quem te criou")) {
+            respostaBot=`Fui desenvolvido pelo <b>${seu_nome}</b> como um assistente virtual!`;
+        }
+        else if (memoriaConhecimento[pN]!==undefined) {
+            respostaBot=memoriaConhecimento[pN];
+        }
+        else if (termoPesquisa!==null) {
+            caixa.innerHTML+=`<b>${seu_nome}:</b> ${pergunta}<br>`;
+            caixa.scrollTop=caixa.scrollHeight;
+            input.value=""; pesquisarNaInternet(termoPesquisa); return;
+        }        else {
+            respostaBot="Eu ainda não sei isso. O que eu deveria responder quando me perguntarem isso?";
+            input.placeholder="Digite a definição aqui...";
+            input.style.borderColor="#28a745";
+            aprendizadoPendente.emProgresso=true;
+            aprendizadoPendente.chavePergunta=pN;
+        }
+
+        caixa.innerHTML+=`<b>${seu_nome}:</b> ${pergunta}<br><b>${meu_nome}:</b> ${respostaBot}<br>${htmlAdicional}<br>`;
+        caixa.scrollTop=caixa.scrollHeight;
+        falar(respostaBot);
+        input.value="";
+    }
+
+    // ── SALVAR CONVERSA ───────────────────────────────────
+    function salvarConversa() {
+        const blob=new Blob([document.getElementById("caixa_resposta").innerText],{type:"text/plain"});
+        const a=document.createElement("a");
+        a.href=URL.createObjectURL(blob); a.download="conversa_polar.txt"; a.click();
+    }
+
+    document.getElementById("entrada_pergunta").addEventListener("keypress", e => {
+        if (e.key==="Enter") responder();
+    });
+</script>
+</body>
+</html>
